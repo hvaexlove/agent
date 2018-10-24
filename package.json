@@ -4,6 +4,7 @@
   "description": "agent-server - open source server",
   "main": "main.ts",
   "scripts": {
+    "test": "npm run pkg",
     "start": "npm run serve",
     "serve": "nodemon dist/main.js",
     "build": "npm run build-ts",
