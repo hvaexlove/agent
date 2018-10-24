@@ -1,0 +1,14 @@
+# logger
+log:
+	dir: /tmp/
+	max_logger_size: 100
+	max_logger_backups: 3
+	days_to_keep: 1
+
+# socket
+socket:
+	server: agent-s.herokuapp.com
+	port: 80
+
+easyagent:
+	uuid: 87dacbba-5be4-4c85-9b05-f313b1ee80b9
