@@ -15,11 +15,11 @@
 > agent-server与agent通过websocket实时通讯。<br />
 > agent拥有断线重连机制。<br />
 
-### Function List
+### Feature
 
-[x] Agent上报机器信息
-[x] Agent远程执行shell
-[x] Agent心跳报文
+- [x] Agent上报机器信息
+- [x] Agent远程执行shell
+- [x] Agent心跳报文
 
 ### Install
 
