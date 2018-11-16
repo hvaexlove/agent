@@ -1,23 +1,20 @@
+const os = require('os');
+const shell = require('shelljs');
+const fs = require("fs");
 import { AgentService } from '../agent_service';
 import { Agent } from '../../model/agent_model';
 import { ExecScript } from '../../model/exec_script_model';
 import { Request } from '../../protocol/service';
 import BaseService from '../base_service';
-import { stringify } from 'querystring';
-const config = require('../../config');
-const os = require('os');
-const shell = require('shelljs');
-const process = require('child_process');
-const fs = require("fs");
-const IdUtils = require('../../utils/id_utils');
-const LogUtils = require('../../utils/log_utils');
-const HttpUtils = require('../../utils/http_utils');
-const global = require('../../global');
-const MapUtils = require('../../utils/map_utils');
+import { getSocketClient, getConfig, getHeaders } from '../../global';
+import { getId } from '../../utils/id_utils';
+import { getLog } from '../../utils/log_utils';
+import { get } from '../../utils/http_utils';
+import { mapToJson, jsonToMap } from '../../utils/map_utils';
 
 class AgentServiceImpl extends BaseService implements AgentService {
 
-    private log: any = LogUtils.getLog('agent_service_impl.ts');
+    private log: any = getLog('agent_service_impl.ts');
 
     constructor() {
         super();
@@ -26,7 +23,7 @@ class AgentServiceImpl extends BaseService implements AgentService {
     public async register(): Promise<any>{
         let ip: string = await this.getIp();
         let agent: Agent = {
-            uuid: config.get().uuid,
+            uuid: getConfig().uuid,
             status: 1,
             host_name: os.hostname(),
             os_type: os.type(),
@@ -43,7 +40,7 @@ class AgentServiceImpl extends BaseService implements AgentService {
     public async execScript(req: Request): Promise<any>{
         let execScript: ExecScript = JSON.parse(req.body);
         let dir: string = os.tmpdir();
-        let filePath: string = `${dir}/${IdUtils.getId()}`;
+        let filePath: string = `${dir}/${getId()}`;
         fs.writeFileSync(filePath, execScript.script, {
             mode: 755
         });
@@ -72,15 +69,15 @@ class AgentServiceImpl extends BaseService implements AgentService {
     }
 
     public async report(result: string, req: Request) {
-        let socket: any = global.getSocketClient();
+        let socket: any = getSocketClient();
         let msg: Request = {
-            id: IdUtils.getId(),
+            id: getId(),
             req_id: req.id,
             target: '/report',
             from: null,
             type: 'json',
             encode: 'utf-8',
-            header: MapUtils.mapToJson(global.getHeader()),
+            header: mapToJson(getHeaders()),
             headerMap: null,
             body: JSON.stringify({result: result}),
             version: 'v1.0',
@@ -91,7 +88,7 @@ class AgentServiceImpl extends BaseService implements AgentService {
     }
 
     private async getIp(): Promise<any> {
-        let response: any = await HttpUtils.get("http://pv.sohu.com/cityjson?ie=utf-8");
+        let response: any = await get("http://pv.sohu.com/cityjson?ie=utf-8");
         if (response.res.statusCode === 200) {
             let ip: string = response.res.text;
             ip = ip.replace('var returnCitySN = ', '');

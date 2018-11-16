@@ -3,12 +3,11 @@ import { OptionService } from '../option_service';
 import { Request } from '../../protocol/service';
 import BaseService from '../base_service';
 import AgentServiceImpl from './agent_service_impl';
-const config = require('../../config');
-const LogUtils = require('../../utils/log_utils');
+import { getLog } from '../../utils/log_utils';
 
 class OptionServiceImpl extends BaseService implements OptionService {
 
-    private log: any = LogUtils.getLog('option_service_impl.ts');
+    private log: any = getLog('option_service_impl.ts');
     private agentService: AgentService = new AgentServiceImpl();
 
     constructor() {

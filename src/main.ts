@@ -1,14 +1,13 @@
 const http = require('http');
 const req = require('require-yml');
-const LogUtils = require('./utils/log_utils');
-const MapUtils = require('./utils/map_utils');
-const ParmUtils = require('./utils/parm_utils');
-const ErrorHandler = require('./error/error_handler');
-const IdUtils = require('./utils/id_utils');
-import BusinessException from './error/business_exception';
 const WebSocket = require('ws');
-var config = require('./config');
-var global = require('./global');
+import { initLog4js, getLog } from './utils/log_utils';
+import { mapToJson, jsonToMap } from './utils/map_utils';
+import { getParm } from './utils/parm_utils';
+import { initErrorHandler } from './error/error_handler';
+import { getId } from './utils/id_utils';
+import BusinessException from './error/business_exception';
+import { setSocketClient, getSocketClient, putHeader, getHeader, getHeaders, setConfig, getConfig } from './global';
 import { Request } from './protocol/service';
 import AgentServiceImpl from './service/impl/agent_service_impl';
 import { AgentService } from './service/agent_service';
@@ -25,7 +24,7 @@ class Main {
     init() {
         console.log('Agent v1.0.0');
         console.log('Copyright (c) 2018 Agent Inc.');
-        ErrorHandler.initErrorHandler();
+        initErrorHandler();
         this.initConfig();
         this.initLog();
         this.initWebSocket();
@@ -35,7 +34,7 @@ class Main {
 
     initConfig() {
         console.log('initConfig...');
-        let configPath = ParmUtils.getParm('-c');
+        let configPath = getParm('-c');
         if (!configPath || configPath === '') {
             throw new BusinessException('configPath不能为空!', 0);
         }
@@ -43,28 +42,28 @@ class Main {
         if (!configObj) {
             throw new BusinessException('config解析有误,请检查路径是否正确!', 0);
         }
-        config.set(configObj);
-        global.put('uuid', configObj.uuid);
+        setConfig(configObj);
+        putHeader('uuid', configObj.uuid);
     }
 
     initLog() {
         console.log('initLog...');
-        LogUtils.initLog();
+        initLog4js();
     }
 
     initWebSocket() {
         console.log('initWebSocket...');
-        const log = LogUtils.getLog('main.ts');
-        const ws = new WebSocket(`ws://${config.get().server}:${config.get().port}`);
+        const log = getLog('main.ts');
+        const ws = new WebSocket(`ws://${getConfig().server}:${getConfig().port}`);
         ws.on('open', async () => {
             let agent: Agent = await new AgentServiceImpl().register();
             let req: Request = {
-                id: IdUtils.getId(),
+                id: getId(),
                 target: '/register',
                 from: null,
                 type: 'json',
                 encode: 'utf-8',
-                header: MapUtils.mapToJson(global.getHeader()),
+                header: mapToJson(getHeaders()),
                 headerMap: null,
                 body: JSON.stringify(agent),
                 version: 'v1.0',
@@ -84,16 +83,16 @@ class Main {
         ws.on('close', () => {
             log.info('disconnected');
         });
-        global.setSocketClient(ws);
+        setSocketClient(ws);
     }
 
     initWebSocketListening() {
         console.log('initWebSocketListening...');
-        const log = LogUtils.getLog('main.ts');
+        const log = getLog('main.ts');
         const isStopInterval = setInterval(() => {
-            let client = global.getSocketClient();
+            let client = getSocketClient();
             if (client.readyState !== 1) {
-                global.setSocketClient(null);
+                setSocketClient(null);
                 this.initWebSocket();
             }
         }, 30000);
@@ -101,17 +100,17 @@ class Main {
 
     initWebSocketHeartbeat() {
         console.log('initWebSocketHeartbeat...');
-        const log = LogUtils.getLog('main.ts');
+        const log = getLog('main.ts');
         const isStopInterval = setInterval(() => {
-            let client = global.getSocketClient();
+            let client = getSocketClient();
             if (client.readyState === 1) {
                 let req: Request = {
-                    id: IdUtils.getId(),
+                    id: getId(),
                     target: '/heartbeat',
                     from: '',
                     type: 'json',
                     encode: 'utf-8',
-                    header: MapUtils.mapToJson(global.getHeader()),
+                    header: mapToJson(getHeaders()),
                     headerMap: null,
                     body: '',
                     version: 'v1.0',

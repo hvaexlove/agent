@@ -1,12 +1,16 @@
 const superagent = require('superagent');
 
-exports.get = (url: string) => {
+let get = (url: string) => {
     return superagent
     .get(url);
 }
 
-exports.post = (url: string, body: any) => {
+let post = (url: string, body: any) => {
     return superagent
     .post(url)
     .send(body);
+}
+
+export {
+    get, post
 }

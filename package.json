@@ -13,10 +13,11 @@
     "watch-tslint": "npm run tslint && npm run watch-ts",
     "watch-ts": "tsc -w",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
-    "pkg": "pkg ./dist/main.js --out-path=pkg/",
-    "repkg": "npm run build && pkg ./dist/main.js --out-path=pkg/"
+    "pkg:dev": "node build/dev.js",
+    "repkg": "npm run build && npm run pkg:dev"
   },
   "dependencies": {
+    "@types/node": "^10.12.9",
     "cryptiles": "^4.1.2",
     "log4js": "^3.0.5",
     "pkg": "^4.3.4",

@@ -1,22 +1,36 @@
+let configObj: any = null;
 let socketClient: any = null;
 let headerMap: Map<string, any> = new Map<string, any>();
 
-module.exports.setSocketClient = (client: any) => {
+
+let setConfig = (config: object) => {
+    configObj = config;
+}
+
+let getConfig = () => {
+    return configObj;
+}
+
+let setSocketClient = (client: any) => {
     socketClient = client;
 }
 
-module.exports.getSocketClient = () => {
+let getSocketClient = () => {
     return socketClient;
 }
 
-module.exports.put = (key: string, value: any) => {
+let putHeader = (key: string, value: any) => {
     headerMap.set(key, value);
 }
 
-module.exports.get = (key: string) => {
+let getHeader = (key: string) => {
     return headerMap.get(key);
 }
 
-module.exports.getHeader = () => {
+let getHeaders = () => {
     return headerMap;
+}
+
+export {
+    setSocketClient, getSocketClient, putHeader, getHeader, getHeaders, setConfig, getConfig
 }
